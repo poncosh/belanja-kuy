@@ -8,7 +8,7 @@ route
   .get("/", Controller.renderStores)
   .get("/create/:userId", isAdmin, Controller.addStore)
   .post("/create/:userId", Controller.saveAddedStore)
-  .get("/:id")
+  .get("/:id", Controller.detailStore)
   .get("/:id/products")
 
 module.exports = route;

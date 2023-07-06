@@ -19,36 +19,30 @@
   <% } %>
   <div class="container" style="margin-top: 20px;">
   <div class="row justify-content-md-center">
-      <form action="/profile/checkout" method="post">
+      <form action="/store/create/<%= id %>" method="post">
         <div class="mb-3">
-            <label for="number" class="form-label">Card Number</label>
-            <input type="text" name="number" id="number" class="form-control" placeholder="Enter card number">
-            
+            <label for="store_name" class="form-label">Store Name</label>
+            <input type="text" name="store_name" id="store_name" class="form-control" placeholder="Enter store name">
         </div>
         <div class="mb-3">
-            <label for="expiry_month" class="form-label">Expiry Month</label>
-            <input type="number" min="1" max="12" name="expiry_month" id="expiry_month" class="form-control">
-            
+            <label for="location" class="form-label">Location</label>
+            <input type="text" name="location" id="location" class="form-control">
         </div>
         <div class="mb-3">
-          <label for="expiry_year" class="form-label">Expiry Year</label>
-          <input type="number" min="1" max="2040" name="expiry_year" id="expiry_year" class="form-control">
-            
+          <label for="description" class="form-label">Description</label>
+          <textarea id="description" name="description" rows="4" cols="50"></textarea>
         </div>
         <div class="mb-3">
-          <label for="cvv" class="form-label">CVV</label>
-          <input type="number" min="1" max="999" name="cvv" id="cvv" class="form-control">
+          <label for="product_sold" class="form-label">Product Sold</label>
+          <input type="number" min="1" max="10000" name="product_sold" id="product_sold" class="form-control">
         </div>
         <div class="mb-3">
-          <label for="amount" class="form-label">Amount</label>
-          <input type="number" min="1" max="999" name="amount" id="amount" class="form-control" value="<%= summariesPayment %>" readonly="readonly">
+          <label for="account_number" class="form-label">Account Number</label>
+          <input type="number" min="1" max="9999999" name="account_number" id="account_number" class="form-control" >
         </div>
-        <button type="submit" class="btn btn-warning">Checkout</button>
+        <button type="submit" class="btn btn-warning">Submit</button>
       </form>
 </div>
-</div>
-<div class="container d-flex justify-content-center flex-column">
-  <p style="font-weight: bold;">Total belanjaan anda adalah: <%= formatPrice(summariesPayment) %></p>
 </div>
   <script
     src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"

@@ -16,25 +16,26 @@
   <% if(errors) { %>
     <div class="btn btn-danger"><%= errors %></div>
   <% } %>
-  <a href="/product/create/<%= id %>">
-    <button class="btn btn-info mb-10">Create Product</button>
-  </a>
-  <div class="container" style="margin-top: 20px;">
-  <div class="row justify-content-md-center">
-    <% products.forEach((el) => { %>
-      <div class="card col-md-3 col-sm-1" style="margin: 5px;">
-        <img src="<%= el.image_url %>" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title"><%= el.product_name %></h5>
-          <h6>by <%= el.store_name %></h6>
-          <p class="card-text"><span style="font-weight: bold;">Stock: </span><%= el.stock %></p>
-          <p class="card-text"><small class="text-muted">Rating: <%= el.avg_rating ? Number(el.avg_rating).toFixed(2) : "0" %></small></p>
-          <a href="/product/<%= el.id %>" class="btn btn-primary">Detail produk</a>
-        </div>
+  <div class="container" style="margin-top: 20px">
+    <div class="row justify-content-md-center">
+      <div class="container-rp" data-aos="fade-in">
+        <h4><%= suc.UserProfile.first_name %> <%= suc.UserProfile.last_name %></h4>
+        <img src="<%= suc.UserProfile.profile_picture %>" width="500px">
+        <p class="card-text p-price">
+          <small class="text-muted"><strong><%= suc.username %></strong></small>
+        </p>
+        <p class="card-text p-price">
+          <small class="text-muted"><strong><%= suc.email %></strong></small>
+        </p>
+        <p class="card-text p-price">
+          <small class="text-muted"><strong><%= suc.role %></strong></small>
+        </p>
+        <p class="card-text p-price">
+          <small class="text-muted"><strong><%= suc.UserProfile.address %></strong></small>
+        </p>
       </div>
-    <% }) %>
-</div>
-</div>
+    </div>
+  </div>
   <script
     src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
     integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"

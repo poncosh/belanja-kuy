@@ -5,7 +5,7 @@ let stores = require("../data/stores.json");
 module.exports = {
   up (queryInterface, Sequelize) {
     stores.forEach((el) => {
-      el.createdAt = el.account_created,
+      el.createdAt = new Date(),
       el.updatedAt = new Date()
     })
 
