@@ -25,6 +25,13 @@ class Controller {
       .then(product => res.send(product))
       .catch(err => console.log(err))
   }
+
+  static renderStores(req, res) {
+    sequelize
+      .query(`SELECT "Store"."id", "Store"."store_name", "Store"."location", "Store"."description", "Store"."account_created", "Store"."product_sold", "Store"."account_number", "Store"."createdAt", "Store"."updatedAt", CAST(SUM("Products".stock) AS INTEGER) AS total_stock FROM "Stores" AS "Store" LEFT OUTER JOIN "Products" AS "Products" ON "Store"."id" = "Products"."StoreId" GROUP BY "Store"."id"`, { type: QueryTypes.SELECT })
+      .then(stores => res.render("Stores", { stores }))
+      .catch(err => console.log(err))
+  }
 }
 
 module.exports = Controller;
