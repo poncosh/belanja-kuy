@@ -21,10 +21,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      account_created: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
       product_sold: {
         allowNull: false,
         type: Sequelize.INTEGER

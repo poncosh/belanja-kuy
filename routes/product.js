@@ -4,9 +4,13 @@ const { middleware } = require("../helpers");
 const route = require("express").Router()
 
 route
-  .get("/", middleware, Controller.renderProduct)
-  .get("/create/:userId", middleware, Controller.addProduct)
-  .get("/:productId", middleware, Controller.detailProduct)
+  .use(middleware)
+  .get("/", Controller.renderProduct)
+  .get("/create/:userId", Controller.addProduct)
+  .get("/:productId/buy/:userId", Controller.buyItem)
+  .get("/:productId/cart/:userId",  Controller.addToCart)
+  .get("/:productId/deletecart/:userId", Controller.deleteProductFromCart)
+  .get("/:productId", Controller.detailProduct)
   
 
 module.exports = route;

@@ -19,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
     store_name: DataTypes.STRING,
     location: DataTypes.STRING,
     description: DataTypes.TEXT,
-    account_created: DataTypes.DATE,
     UserId: DataTypes.INTEGER,
     product_sold: DataTypes.INTEGER,
     account_number: DataTypes.INTEGER

@@ -1,6 +1,8 @@
 const { User, Store, Product, Rating, ShoppingCart, ShoppingCartItem, sequelize } = require("../models");
 const { Op, QueryTypes } = require("sequelize");
 const bcrypt = require("bcryptjs")
+const formatPrice = require("../helpers/formatPrice.js");
+const {Checkout} = require("checkout-sdk-node");
 
 class Controller {
   static loginPage(req, res) {
@@ -61,19 +63,22 @@ class Controller {
   }
 
   static detailProduct(req, res) {
-    const { productId } = req.params
-
-    Product
-      .findOne({
-        where: {
-          id: productId
-        },
-        include: {
-          model: Rating
-        }
+    const { productId } = req.params;
+    Product.findOne({
+      where: {
+        id: productId,
+      },
+      include: {
+        model: Rating,
+      },
+    })
+      .then((products) => {
+        console.log(products);
+        let rating = products.dataValues.Ratings;
+        res.render("DetailProduct", { id: req.session.userId ? req.session.userId : false, products, rating, formatPrice });
+        // res.send(products);
       })
-      .then(product => res.send(product))
-      .catch(err => console.log(err))
+      .catch((err) => console.log(err));
   }
 
   static renderStores(req, res) {
@@ -96,12 +101,11 @@ class Controller {
       }
     })
     .then(user => {
-      console.log(user);
       if(user.Store) {
         const errorMesage = "Anda sudah memiliki store!"
         res.redirect(`/store?errors=${errorMesage}`)
       } else {
-        res.render("Add Store")
+        res.render("AddStore")
       }
     })
     .catch(err => res.send(err))
@@ -129,10 +133,137 @@ class Controller {
           const errorMesage = "Anda harus membuat store terlebih dahulu!"
           res.redirect(`/product?errors=${errorMesage}`)
         } else {
-          res.render("Add Product")
+          res.render("AddProduct")
         }
       })
       .catch(err => console.log(err))
+  }
+
+  static addToCart(req, res) {
+    const { productId, userId } = req.params;
+    const UserId = userId;
+    const ProductId = productId;
+    let ShoppingCartId;
+    const thisDate = new Date().toISOString().split('T')[0];
+    let totalShop;
+
+    sequelize.query(`INSERT INTO "ShoppingCarts"("UserId", summary_shop, "createdAt", "updatedAt") SELECT $1, 0, '${thisDate}', '${thisDate}' WHERE NOT EXISTS (SELECT "UserId" FROM "ShoppingCarts" WHERE "UserId" = $1);`, { bind: [UserId] })
+      .then(success => {
+        return ShoppingCart.findOne({where:{UserId:userId}})
+      })
+      .then(success => {
+        ShoppingCartId = success.id;
+        return sequelize.query(`INSERT INTO "ShoppingCartItems"("ProductId", "ShoppingCartId", "quantity", "createdAt", "updatedAt") SELECT $1, $2, 0,   '${thisDate}', '${thisDate}' WHERE NOT EXISTS (SELECT "ProductId" FROM "ShoppingCartItems" WHERE "ProductId" = $1)`, { bind: [ProductId, success.id] })
+      })
+      .then(success => {
+        return ShoppingCartItem.findOne({
+          where: {
+            ShoppingCartId: ShoppingCartId,
+            ProductId: ProductId
+          }
+        })
+      })
+      .then(shoppinCartItem => {
+        shoppinCartItem.increment('quantity')
+        return Product.findByPk(productId)
+      })
+      .then(product => {
+        product.decrement('stock')
+        return sequelize.query(`UPDATE "ShoppingCarts" SET summary_shop = summary_shop + $1 WHERE "UserId" = $2`, { bind: [product.price, UserId]})
+      })
+      .then(success => {
+        return res.redirect(`/product/${productId}`)
+      })
+      .catch(err => console.log(err))
+  }
+
+  static cartUser(req, res) {
+    const { userId } = req.session;
+    const UserId = userId
+    let cart;
+
+    sequelize.query(`SELECT "Users".id, "Users".username, "ShoppingCartItems"."quantity", "Products"."product_name", "Products"."image_url", "Products".stock, "Products".id AS "prod_id", "Products".price FROM "Users" JOIN "ShoppingCarts" ON "Users".id = "ShoppingCarts"."UserId" JOIN "ShoppingCartItems" ON "ShoppingCarts".id = "ShoppingCartItems"."ShoppingCartId" JOIN "Products" ON "ShoppingCartItems"."ProductId" = "Products".id WHERE "Users".id = ${req.session.userId}`, { type: QueryTypes.SELECT })
+    .then(success => {
+      cart = success;
+      return ShoppingCart
+        .findOne({
+          raw: true,
+          where: {
+            UserId
+          }
+        })
+    })
+    .then(summary => {
+      return res.render("Cart", { formatPrice, errors: req.query.errors ? req.query.errors : false, cart, summariesPayment: summary.summary_shop })
+    })
+    .catch(err => res.send(err))
+  }
+
+  static buyItem(req, res) {
+    const { userId } = req.session;
+    let summariesPayment;
+
+    ShoppingCart
+      .findOne({
+        where: {
+          UserId: userId
+        }
+      })
+      .then(summaryShop => {
+        summariesPayment = summaryShop.summary_shop;
+        return sequelize.query(`SELECT "Users".username, "ShoppingCartItems"."quantity", "Products"."product_name", "Products"."image_url", "Products".stock, "Products".id AS "prod_id", "Products".price FROM "Users" JOIN "ShoppingCarts" ON "Users".id = "ShoppingCarts"."UserId" JOIN "ShoppingCartItems" ON "ShoppingCarts".id = "ShoppingCartItems"."ShoppingCartId" JOIN "Products" ON "ShoppingCartItems"."ProductId" = "Products".id WHERE "Users".id = ${req.session.userId}`, { type: QueryTypes.SELECT })
+      })
+      .then(detailShop => {
+        res.render  ("PayMent", { formatPrice, errors: req.query.errors ? req.query.errors : false,summariesPayment, detailShop })
+      })
+  }
+  
+  static deleteProductFromCart(req, res) {
+    const { userId } = req.session;
+    const { productId } = req.params;
+    let shoppingCartId;
+    let shoppingCartVal;
+    
+    ShoppingCart.findOne({where:{UserId:userId}})
+      .then(success => {
+        shoppingCartVal = success.summary_shop;
+        shoppingCartId = success.id;
+        return sequelize.query(`SELECT "Products"."price" * "ShoppingCartItems".quantity AS "delete" FROM "ShoppingCartItems" JOIN "Products" ON "ShoppingCartItems"."ProductId" = "Products".id WHERE "Products".id = $1 AND "ShoppingCartItems"."ShoppingCartId" = $2`, {bind: [productId, shoppingCartId]}, { type: QueryTypes.SELECT })
+      })
+      .then(success => {
+        console.log(success);
+        return sequelize.query(`UPDATE "ShoppingCarts" SET summary_shop = summary_shop - $1 WHERE "UserId" = $2`, { bind: [success[0][0].delete, userId]})
+      })
+      .then(success => {
+        return sequelize.query(`DELETE FROM "ShoppingCartItems" WHERE "ShoppingCartId" = $1 AND "ProductId" = $2`, {bind: [shoppingCartId, productId]})
+      })
+      .then(success => res.redirect(`/product/${productId}/cart/${userId}`))
+      .catch(err => console.log(err))
+  }
+
+  static checkout(req, res) {
+    const { number, expiry_month, expiry_year, cvv, amount } = req.body;
+
+    const cko = new Checkout('sk_test_3e1ad21b-ac23-4eb3-ad1f-375e9fb56481');
+
+    console.log(req.body);
+    cko.payments.request({
+      source: {
+          number: number,
+          expiry_month: Number(expiry_month),
+          expiry_year: Number(expiry_year),
+          cvv: cvv
+      },
+      currency: 'IDR',
+      amount: Number(amount)
+  })
+  .then(transaction => {
+    const successMessage = `Selamat, transaksi anda berhasil!`
+    return res.redirect(`/product?errors=${successMessage}`)
+  })
+  .catch(err => {
+    return res.send(err.body.error_codes)
+  })
   }
 }
 
