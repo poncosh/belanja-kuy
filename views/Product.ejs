@@ -13,6 +13,12 @@
 </head>
 <body>
   <%- include("./partials/header.ejs") %>
+  <% if(errors) { %>
+    <div class="btn btn-danger"><%= errors %></div>
+  <% } %>
+  <a href="/product/create/<%= id %>">
+    <button class="btn btn-info mb-10">Create Product</button>
+  </a>
   <div class="container" style="margin-top: 20px;">
   <div class="row justify-content-md-center">
     <% products.forEach((el) => { %>
