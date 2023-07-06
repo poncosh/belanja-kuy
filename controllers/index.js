@@ -1,7 +1,54 @@
 const { User, Store, Product, Rating, ShoppingCart, ShoppingCartItem, sequelize } = require("../models");
 const { Op, QueryTypes } = require("sequelize");
+const bcrypt = require("bcryptjs")
 
 class Controller {
+  static loginPage(req, res) {
+    res.render("Login")
+  }
+
+  static postLogin(req, res) {
+    const { email, password } = req.body;
+
+    User.findOne({
+      where: {
+        email
+      }
+    })
+    .then(async user => {
+      try {
+        if(await bcrypt.compare(password, user.password)) {
+          return res.redirect("/")
+        } else {
+          const errorMsg = "Invalid email/password"
+          return res.redirect(`/login?errors=${errorMsg}`)
+        }
+      } catch (e) {
+        const errorMsg = "Invalid email/password"
+        return res.redirect(`/login?errors=${errorMsg}`)
+      }
+    })
+    .catch(err => res.send(err))
+  }
+
+  static registerUser(req, res) {
+    res.render("Register")
+  }
+
+  static postUser(req, res) {
+    const { username, email, password, role } = req.body
+
+    User
+      .create({ 
+        username,
+        email,
+        password,
+        role
+      })
+      .then(result => res.redirect("/login"))
+      .catch(err => res.redirect("/register"))
+  }
+
   static renderProduct(req, res) {
     sequelize
       .query(`SELECT "Product".*, "Stores"."store_name", avg("Ratings".rating) AS "avg_rating" FROM "Products" AS "Product" JOIN "Ratings" AS "Ratings" ON "Product"."id" = "Ratings"."ProductId" JOIN "Stores" ON "Product"."StoreId" = "Stores"."id" GROUP BY "Product"."id", "Stores"."id";`, { type: QueryTypes.SELECT }
