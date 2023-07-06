@@ -4,7 +4,7 @@ const route = require("express").Router()
 
 route
   .get("/", Controller.renderProduct)
-  .get("/:productId")
+  .get("/:productId", Controller.detailProduct)
   .get("/:productId/add/:userId")
 
 module.exports = route;
