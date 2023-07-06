@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+      .container-img {
+        width: fit-content;
+      }
+
+      .container-rp {
+        margin-left: 300px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .p-stock,
+      .p-price {
+        margin-bottom: 0px;
+      }
+
+      .card-review {
+        border-radius: 30px;
+        background: #e0e0e0;
+        box-shadow: 15px 15px 30px #666363, -15px -15px 30px #ebeaea;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include("./partials/header.ejs") %>
+
+    <div class="container" style="margin-top: 20px">
+      <div class="row justify-content-md-center">
+        <div class="container-img">
+          <img src="<%= products.image_url %>" alt="..." data-aos="fade-in" />
+        </div>
+
+        <div class="container-rp" data-aos="fade-in">
+          <h4><%= products.product_name %></h4>
+          <p class="card-text p-stock">
+            <small class="text-muted"><strong>Stock : <%= products.stock %></strong></small>
+          </p>
+          <p class="card-text p-price">
+            <small class="text-muted"><strong><%= formatPrice(products.price) %></strong></small>
+          </p>
+        </div>
+
+        <% rating.forEach((el) => { %>
+        <div class="card col-md-3 col-sm-1 card-review" style="margin: 10px" data-aos="flip-left" data-aos-offset="250">
+          <div class="card-body">
+            <p class="card-text">
+              <small class="text-muted"><strong>Rating : </strong><%= Number(el.rating).toFixed(2) %></small>
+            </p>
+            <h5 class="card-title">Dair: <%= el.username %></h5>
+            <p class="card-text">
+              <small class="text-muted"><strong>Review : </strong><%= el.review %></small>
+            </p>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+  </body>
+</html>
