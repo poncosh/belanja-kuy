@@ -320,6 +320,7 @@ class Controller {
         })
       })
       .then(shoppinCartItem => {
+        console.log(shoppinCartItem);
         shoppinCartItem.increment('quantity')
         return Product.findByPk(productId)
       })
@@ -350,6 +351,9 @@ class Controller {
         })
     })
     .then(summary => {
+      if (summary === undefined) {
+        return res.send('Belum pesan barang!')
+      }
       return res.render("Cart", { formatPrice, errors: req.query.errors ? req.query.errors : false, cart, summariesPayment: summary.summary_shop })
     })
     .catch(err => res.send(err))
@@ -402,6 +406,8 @@ class Controller {
 
     const cko = new Checkout('sk_test_3e1ad21b-ac23-4eb3-ad1f-375e9fb56481');
 
+    const successMessage = `Selamat, transaksi anda berhasil!`
+
     cko.payments.request({
       source: {
           number: number,
@@ -414,13 +420,25 @@ class Controller {
   })
   .then(transaction => {
     if(transaction.status === "Declined") {
-      res.send("Maaf, transaksi gagal")
+      return res.send("Maaf, transaksi gagal")
     }
-    const successMessage = `Selamat, transaksi anda berhasil!`
+    return ShoppingCart.findOne({
+      where: {
+        UserId: req.session.userId
+      }
+    })
+  })
+  .then(shoppingcartid => {
+    return sequelize.query(`DELETE FROM "ShoppingCartItems" WHERE "ShoppingCartItems"."ShoppingCartId" = $1`, { bind: [shoppingcartid.id]})
+  })
+  .then(success => {
+    return sequelize.query(`DELETE FROM "ShoppingCarts" WHERE "ShoppingCarts"."UserId" = $1`, {bind: [req.session.userId]})
+  })
+  .then(success => {
     return res.redirect(`/product?errors=${successMessage}`)
   })
   .catch(err => {
-    return res.send(err.body.error_codes)
+    return console.log(err)
   })
   }
 
