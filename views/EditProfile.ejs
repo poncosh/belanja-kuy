@@ -19,25 +19,25 @@
   <% } %>
   <div class="container" style="margin-top: 20px;">
   <div class="row justify-content-md-center">
-      <form action="/profile/create/<%= id %>" method="post">
+      <form action="/profile/edit" method="post">
         <div class="mb-3">
             <label for="first_name" class="form-label">First Name</label>
-            <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Enter Your Name">
+            <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Enter Your Name" value="<%= profile.first_name %>">
         </div>
         <div class="mb-3">
             <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" name="last_name" id="last_name" class="form-control">
+            <input type="text" name="last_name" id="last_name" class="form-control" value="<%= profile.last_name %>">
         </div>
         <div class="mb-3">
           <label for="address" class="form-label">Address</label>
-          <textarea id="address" name="address" rows="4" cols="50"></textarea>
+          <textarea id="address" name="address" rows="4" cols="50"><%= profile.address %></textarea>
         </div>
         <div class="mb-3">
           <label for="profile_picture" class="form-label">Profile Picture</label>
-          <input type="text" name="profile_picture" id="profile_picture" class="form-control" >
+          <input type="text" name="profile_picture" id="profile_picture" class="form-control" value="<%= profile.profile_picture %>">
         </div>
         <div class="mb-3">
-          <input type="date" name="date_of_birth" id="date_of_birth" class="form-control" >
+          <input type="date" name="date_of_birth" id="date_of_birth" class="form-control" value="<%= profile.date_of_birth.toISOString().slice(0, 10) %>">
         </div>
         <button type="submit" class="btn btn-warning">Submit</button>
       </form>

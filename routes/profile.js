@@ -8,6 +8,8 @@ route
   .get("/", Controller.renderProfile)
   .get("/cart", Controller.cartUser)
   .get("/checkout", Controller.buyItem)
+  .get("/edit", Controller.editProfile)
+  .post("/edit", Controller.saveEditedProfile)
   .post("/checkout", Controller.checkout)
   .post("/create/:id", Controller.saveProfile)
 

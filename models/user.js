@@ -19,7 +19,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    username: DataTypes.STRING,
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate : {
+        notEmpty: {
+          msg: "Username tidak boleh kosong"
+        },
+        notNull: {
+          msg: "Username tidak boleh kosong"
+        }
+      },
+      unique: {
+        args: true,
+        msg: "Username telah terdaftar"
+      }
+    },
     email: {
       type: DataTypes.STRING,
       unique: {
@@ -27,8 +42,38 @@ module.exports = (sequelize, DataTypes) => {
         msg: "Email telah terdaftar"
       }
     },
-    password: DataTypes.STRING,
-    role: DataTypes.STRING
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate : {
+        notEmpty: {
+          msg: "Password tidak boleh kosong"
+        },
+        notNull: {
+          msg: "Password tidak boleh kosong"
+        },
+        isUniquePas(value) {
+          const onlyLettersAndNumbers = (str) => {
+            return /^[A-Za-z0-9]*$/.test(str);
+          }
+          if(!onlyLettersAndNumbers(value)) {
+            throw new Error ("Password harus memiliki beberapa variabel huruf dan angka!")
+          }
+        }
+      }
+    },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate : {
+        notEmpty: {
+          msg: "Role tidak boleh kosong"
+        },
+        notNull: {
+          msg: "Role tidak boleh kosong"
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'User',

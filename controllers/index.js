@@ -28,12 +28,11 @@ class Controller {
   }
 
   static saveProfile(req, res) {
-    const { first_name, last_name, username, address, profile_picture, date_of_birth } = req.body;
+    const { first_name, last_name, address, profile_picture, date_of_birth } = req.body;
 
     const newUsProfile = {
       first_name,
       last_name,
-      username,
       address,
       profile_picture,
       date_of_birth,
@@ -42,7 +41,15 @@ class Controller {
     UserProfile
       .create(newUsProfile)
       .then(suc => res.redirect("/"))
-      .catch(err => res.send(err))
+      .catch(err => {
+        if(err.name === "SequelizeValidationError") {
+          const errArray = [];
+          err.errors.map(el => errArray.push(el.message));
+          return res.redirect(`profile/?errors=${errArray}`)
+        } else {
+          return res.send(err)
+        }
+      })
   }
 
   static postLogin(req, res) {
@@ -69,11 +76,19 @@ class Controller {
         return res.redirect(`/login?errors=${errorMsg}`)
       }
     })
-    .catch(err => res.send(err))
+    .catch(err => {
+      if(err.name === "SequelizeValidationError") {
+        const errArray = [];
+        err.errors.map(el => errArray.push(el.message));
+        return res.redirect(`/login?errors=${errArray}`)
+      } else {
+        return res.send(err)
+      }
+    })
   }
 
   static registerUser(req, res) {
-    res.render("Register")
+    res.render("Register", { errors: req.query.errors ? req.query.errors : false,  })
   }
 
   static postUser(req, res) {
@@ -87,7 +102,60 @@ class Controller {
         role
       })
       .then(result => res.redirect("/login"))
-      .catch(err => res.redirect("/register"))
+      .catch(err => {
+        if(err.name === "SequelizeValidationError") {
+          const errArray = [];
+          err.errors.map(el => errArray.push(el.message));
+          return res.redirect(`/register?errors=${errArray}`)
+        } else {
+          return res.send(err)
+        }
+      })
+  }
+
+  static editProfile(req, res) {
+    UserProfile
+      .findOne({
+        where: {
+          UserId: req.session.userId
+        }
+      })
+      .then(suc => res.render("EditProfile", { errors: req.query.errors ? req.query.errors : false, profile: suc }))
+      .catch(err => {
+        if(err.name === "SequelizeValidationError") {
+          const errArray = [];
+          err.errors.map(el => errArray.push(el.message));
+          return res.redirect(`/profile/edit?errors=${errArray}`)
+        } else {
+          return res.send(err)
+        }
+      })
+  }
+
+  static saveEditedProfile(req, res) {
+    const { first_name, last_name, address, profile_picture, date_of_birth } = req.body;
+
+    UserProfile
+      .update({
+        first_name,
+        last_name,
+        address,
+        profile_picture,
+        date_of_birth
+      }, {
+        where: {
+          UserId: req.session.userId
+      }})
+      .then(suc => res.redirect("/"))
+      .catch(err => {
+        if(err.name === "SequelizeValidationError") {
+          const errArray = [];
+          err.errors.map(el => errArray.push(el.message));
+          return res.redirect(`/profile/edit?errors=${errArray}`)
+        } else {
+          return res.send(err)
+        }
+      })
   }
 
   static renderProduct(req, res) {
@@ -163,7 +231,15 @@ class Controller {
     Store
       .create(newStore)
       .then(success => res.redirect("/store"))
-      .catch(err => res.send(err))
+      .catch(err => {
+        if(err.name === "SequelizeValidationError") {
+          const errArray = [];
+          err.errors.map(el => errArray.push(el.message));
+          return res.redirect(`/store/create/${req.session.userId}?errors=${errArray}`)
+        } else {
+          return res.send(err)
+        }
+      })
   }
 
   static saveAddedProduct(req, res) {
@@ -186,7 +262,15 @@ class Controller {
       return Product.create(newProduct)
     })
     .then(suc => res.redirect("/product"))
-    .catch(err => res.send(err))
+    .catch(err => {
+      if(err.name === "SequelizeValidationError") {
+        const errArray = [];
+        err.errors.map(el => errArray.push(el.message));
+        return res.redirect(`/product/create/${req.session.userId}?errors=${errArray}`)
+      } else {
+        return res.send(err)
+      }
+    })
   }
   static addProduct (req, res) {
     const { userId } = req.params

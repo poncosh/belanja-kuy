@@ -16,12 +16,75 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Store.init({
-    store_name: DataTypes.STRING,
-    location: DataTypes.STRING,
-    description: DataTypes.TEXT,
+    store_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate : {
+        notNull : {
+          msg: "Store tidak boleh kosong!"
+        },
+        notEmpty : {
+          msg: "Store tidak boleh kosong!"
+        }
+      }
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate : {
+        notNull : {
+          msg: "Location tidak boleh kosong!"
+        },
+        notEmpty : {
+          msg: "Location tidak boleh kosong!"
+        }
+      }
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      validate : {
+        notNull : {
+          msg: "Description tidak boleh kosong!"
+        },
+        notEmpty : {
+          msg: "Description tidak boleh kosong!"
+        }
+      }
+    },
     UserId: DataTypes.INTEGER,
-    product_sold: DataTypes.INTEGER,
-    account_number: DataTypes.INTEGER
+    product_sold: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate : {
+        notNull : {
+          msg: "Product sold tidak boleh kosong!"
+        },
+        notEmpty : {
+          msg: "Product sold tidak boleh kosong!"
+        },
+        isNumeric : {
+          args: true,
+          msg: "Price harus number"
+        }
+      }
+    },
+    account_number: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate : {
+        notNull : {
+          msg: "Product sold tidak boleh kosong!"
+        },
+        notEmpty : {
+          msg: "Product sold tidak boleh kosong!"
+        },
+        isNumeric : {
+          args: true,
+          msg: "Price harus number"
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'Store',

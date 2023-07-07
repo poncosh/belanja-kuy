@@ -28,9 +28,6 @@ module.exports = {
         },
         allowNull: false
       },
-      username: {
-        type: Sequelize.STRING
-      },
       first_name: {
         type: Sequelize.STRING
       },
